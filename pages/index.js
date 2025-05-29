@@ -175,7 +175,7 @@ export default function MintIdentity() {
 async function connectMetamask() {
   if (window.ethereum && window.ethereum.isMetaMask) {
     try {
-      // switch atau add chain
+      // Switch ke chain atau tambah chain jika belum ada
       await window.ethereum.request({
         method: "wallet_switchEthereumChain",
         params: [{ chainId: "0xa8230" }]
@@ -183,18 +183,37 @@ async function connectMetamask() {
       const [addr] = await window.ethereum.request({ method: "eth_requestAccounts" });
       setAccount(addr);
     } catch (switchError) {
-      // handle error di sini jika perlu
+      // Jika chain belum terdaftar di Metamask, tambahkan chain
+      if (switchError.code === 4902) {
+        try {
+          await window.ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [{
+              chainId: "0xa8230",
+              chainName: "Pharos Testnet",
+              rpcUrls: ["https://testnet.dplabs-internal.com"],
+              nativeCurrency: {
+                name: "Pharos",
+                symbol: "PHRS",
+                decimals: 18
+              },
+              blockExplorerUrls: ["https://testnet.pharosscan.xyz"]
+            }]
+          });
+          // Setelah berhasil menambah chain, minta akun
+          const [addr] = await window.ethereum.request({ method: "eth_requestAccounts" });
+          setAccount(addr);
+        } catch (addError) {
+          alert("Gagal menambahkan jaringan ke Metamask.");
+        }
+      } else {
+        alert("Gagal switch jaringan di Metamask.");
+      }
     }
   } else {
     alert("Metamask belum terpasang di browser Anda!");
   }
 }
-      const [addr] = await window.ethereum.request({ method: "eth_requestAccounts" });
-      setAccount(addr);
-    } else {
-      alert("Metamask belum terpasang di browser Anda!");
-    }
-  }
 
   async function connectOKXWallet() {
     setShowWalletModal(false);
