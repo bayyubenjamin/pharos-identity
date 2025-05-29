@@ -131,47 +131,49 @@ export default function MintIdentity() {
   }
 
   useEffect(() => {
-    async function checkMinted() {
+   // Cek status mint NFT
+async function checkMinted() {
+  setCekMintLog("");
+  setMinted(false);
+  setNftImg(NFT_IMAGE);
+  if (!account) return;
+  try {
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
+    const bal = await contract.balanceOf(account);
+    if (bal > 0) {
+      let tokenId;
+      try {
+        tokenId = await contract.tokenOfOwnerByIndex(account, 0);
+      } catch (e) {
+        tokenId = null;
+      }
+      if (tokenId) {
+        const tokenUri = await contract.tokenURI(tokenId);
+        setMetadataUrl(tokenUri);
+        try {
+          const meta = await fetch(tokenUri).then(res => res.json());
+          setNftImg(meta.image || NFT_IMAGE);
+        } catch (e) {
+          setNftImg(NFT_IMAGE);
+        }
+      }
+      setCekMintLog(LANGUAGES[lang].alreadyMinted);
+      setMinted(true);
+      alert(LANGUAGES[lang].alreadyMinted);
+    } else {
       setCekMintLog("");
       setMinted(false);
       setNftImg(NFT_IMAGE);
-      if (!account) return;
-      try {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
-        const bal = await contract.balanceOf(account);
-        if (bal > 0) {
-          let tokenId;
-          try {
-            tokenId = await contract.tokenOfOwnerByIndex(account, 0);
-          } catch (e) {}
-          if (tokenId) {
-            const tokenUri = await contract.tokenURI(tokenId);
-            setMetadataUrl(tokenUri);
-            try {
-              const meta = await fetch(tokenUri).then(res => res.json());
-              setNftImg(meta.image || NFT_IMAGE);
-            } catch(e) {
-              setNftImg(NFT_IMAGE);
-            }
-          }
-          setCekMintLog(LANGUAGES[lang].alreadyMinted);
-          setMinted(true);
-          alert(LANGUAGES[lang].alreadyMinted);
-        } else {
-          setCekMintLog("");
-          setMinted(false);
-          setNftImg(NFT_IMAGE);
-        }
-      } catch (err) {
-        setCekMintLog("Gagal cek status mint: " + err.message);
-      }
     }
-    checkMinted();
-    // eslint-disable-next-line
-  }, [account, lang]);
+  } catch (err) {
+    setCekMintLog("Gagal cek status mint: " + (err?.message || err));
+  }
+}
+// Pastikan checkMinted dipanggil di useEffect dengan dependency [account, lang]
+// useEffect(() => { checkMinted(); /* ... */ }, [account, lang]);
 
-  // --- POPUP WALLET CONNECT ---
+// --- POPUP WALLET CONNECT ---
 async function connectMetamask() {
   if (window.ethereum && window.ethereum.isMetaMask) {
     try {
@@ -182,6 +184,7 @@ async function connectMetamask() {
       });
       const [addr] = await window.ethereum.request({ method: "eth_requestAccounts" });
       setAccount(addr);
+      setShowWalletModal(false); // Tutup modal jika berhasil connect
     } catch (switchError) {
       // Jika chain belum terdaftar di Metamask, tambahkan chain
       if (switchError.code === 4902) {
@@ -203,6 +206,7 @@ async function connectMetamask() {
           // Setelah berhasil menambah chain, minta akun
           const [addr] = await window.ethereum.request({ method: "eth_requestAccounts" });
           setAccount(addr);
+          setShowWalletModal(false); // Tutup modal jika berhasil connect
         } catch (addError) {
           alert("Gagal menambahkan jaringan ke Metamask.");
         }
@@ -215,25 +219,24 @@ async function connectMetamask() {
   }
 }
 
-  async function connectOKXWallet() {
-    setShowWalletModal(false);
-    if (window.okxwallet) {
-      try {
-        await window.okxwallet.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: "0xa84f0" }]
-        });
-        const [addr] = await window.okxwallet.request({ method: "eth_requestAccounts" });
-        setAccount(addr);
-      } catch (err) {
-        alert("Gagal konek OKX Wallet: " + err.message);
-      }
-    } else {
-      alert("OKX Wallet belum terpasang di browser Anda!");
+async function connectOKXWallet() {
+  if (window.okxwallet) {
+    try {
+      await window.okxwallet.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: "0xa8230" }] // Pastikan chainId sesuai!
+      });
+      const [addr] = await window.okxwallet.request({ method: "eth_requestAccounts" });
+      setAccount(addr);
+      setShowWalletModal(false); // Tutup modal jika berhasil connect
+    } catch (err) {
+      alert("Gagal konek OKX Wallet: " + (err?.message || err));
     }
+  } else {
+    alert("OKX Wallet belum terpasang di browser Anda!");
   }
-
-  // --- END POPUP WALLET CONNECT ---
+}
+// --- END POPUP WALLET CONNECT ---
 
   async function mintIdentityNFT() {
     try {
