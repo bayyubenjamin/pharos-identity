@@ -4,7 +4,7 @@ import { ethers } from "ethers";
 import SHA256 from "crypto-js/sha256";
 
 // --- PHAROS TESTNET CONFIG ---
-const PINATA_JWT = process.env.NEXT_PUBLIC_PINATA_JWT || process.env.PINATA_JWT;
+const PINATA_JWT = process.env.NEXT_PUBLIC_PINATA_JWT;
 const CONTRACT_ADDRESS = "0x4AA7E897aae2A950e4B0E05590A8058478afB493";
 const CONTRACT_ABI = [
   {
