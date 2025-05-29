@@ -172,32 +172,34 @@ export default function MintIdentity() {
   }, [account, lang]);
 
   // --- POPUP WALLET CONNECT ---
-  async function connectMetamask() {
-    setShowWalletModal(false);
-    if (window.ethereum && window.ethereum.isMetaMask) {
-      try {
+async function connectMetamask() {
+  setShowWalletModal(false);
+  if (window.ethereum && window.ethereum.isMetaMask) {
+    try {
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: "0xa8230" }]
+      });
+    } catch (switchError) {
+      if (switchError.code === 4902) {
         await window.ethereum.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: "0xa84f0" }]
+          method: "wallet_addEthereumChain",
+          params: [{
+            chainId: "0xa8230",
+            chainName: "Pharos Testnet",
+            rpcUrls: ["https://testnet.dplabs-internal.com"],
+            nativeCurrency: {
+              name: "Pharos",
+              symbol: "PHRS",
+              decimals: 18
+            },
+            blockExplorerUrls: ["https://testnet.pharosscan.xyz"]
+          }]
         });
-      } catch (switchError) {
-        if (switchError.code === 4902) {
-          await window.ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [{
-              chainId: "0xa84f0",
-              chainName: "Pharos Testnet",
-              rpcUrls: ["https://testnet.dplabs-internal.com"],
-              nativeCurrency: {
-                name: "Pharos",
-                symbol: "PHRS",
-                decimals: 18
-              },
-              blockExplorerUrls: ["https://testnet.pharosscan.xyz"]
-            }]
-          });
-        }
       }
+    }
+  }
+}
       const [addr] = await window.ethereum.request({ method: "eth_requestAccounts" });
       setAccount(addr);
     } else {
