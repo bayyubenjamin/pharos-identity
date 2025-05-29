@@ -1,5 +1,3 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /.pnp
@@ -12,6 +10,7 @@
 
 # testing
 /coverage
+/coverage.json
 
 # next.js
 /.next/
@@ -24,14 +23,16 @@
 .DS_Store
 *.pem
 
-# debug
+# debug logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files
 .env*
+.env
+.env.local
 
 # vercel
 .vercel
@@ -39,9 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-node_modules
-.env
 
 # Hardhat files
 /cache
@@ -51,9 +49,6 @@ node_modules
 /typechain
 /typechain-types
 
-# solidity-coverage files
-/coverage
-/coverage.json
+# Hardhat Ignition deployments
+/ignition/deployments
 
-# Hardhat Ignition default folder for deployments against a local node
-ignition/deployments/chain-31337
