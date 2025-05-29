@@ -5,9 +5,9 @@ import GoogleProvider from "next-auth/providers/google";
 
 export default NextAuth({
   providers: [
- GoogleProvider({
-  clientId: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
     // Aktifkan jika sudah siap:
     // TelegramProvider({
@@ -18,6 +18,7 @@ export default NextAuth({
   session: {
     strategy: "jwt",
   },
+  secret: process.env.NEXTAUTH_SECRET, // TAMBAHKAN BARIS INI!
   // opsional, untuk custom callback session
   callbacks: {
     async session({ session, token, user }) {
